@@ -1,0 +1,73 @@
+//show icon in text input
+	  $.fn.addClickableBackgroundImage = function(params) {
+        params = $.extend({ alignTo: 'right' }, params);
+        this.each(function() {
+           var input = $(this);
+           if (input.is(':input[type=text]')) {
+             var inputPos = input.position();
+             var inputWidth = input.width();
+             var inputOuterHeight = input.outerHeight();
+             var imgWidth = input.height();
+             var imgHeight = imgWidth;
+
+             input.css({
+	         'background': 'url(' + params.imageSrc + ') ' + params.alignTo + ' no-repeat',
+	         'background-color': 'white',
+	         'background-size': imgWidth + 'px ' + imgHeight + 'px'
+	      });
+ 
+              var div = $('<div/>').appendTo($('body'));
+              var divLeft, divTop;
+              if (params.alignTo.toLowerCase() == 'left') {
+                 divLeft = inputPos.left + (inputOuterHeight - imgHeight) / 2;
+              } else if (params.alignTo.toLowerCase() == 'center') {
+                 divLeft = inputPos.left + (inputWidth - imgWidth) / 2
+              } else {
+                 divLeft = inputPos.left + inputWidth - imgWidth + (inputOuterHeight - imgHeight) / 2;
+              }
+ 
+              divTop = inputPos.top + (inputOuterHeight - imgHeight) / 2;
+ 
+              var img = $('<img />');
+              img.bind('load', function () {
+                  div.width(imgWidth);
+                  div.height(imgHeight);
+                  div.offset({
+                      left: divLeft,
+                      top: divTop
+                  }).css('cursor', 'pointer');
+                  div.bind('click', function () {
+                      if (typeof params.callback == 'function') {
+                          params.callback.call(this, input.attr('id'));
+                      } else if (eval('typeof ' + params.callback) == 'function') {
+                          eval(params.callback + '.call(this, "' + input.attr('id') + '")');
+                      } else {
+                          alert('Callback "' + params.callback + '" is not a function, or does not exist.');
+                      }
+                  });
+              });
+ 
+              //refer to http://www.w3schools.com/css/css_image_transparency.asp
+              //for visibility in different browsers
+              var imgStyle = 'visibility:hidden;opacity=0';
+              if ($.browser.msie) {
+                  imgStyle = 'opacity=0;filter:alpha(opacity=0);'
+              }
+              img.appendTo(div).attr({
+                  src: params.imageSrc,
+                  width: imgWidth,
+                  height: imgHeight,
+                  style: imgStyle
+              });
+            }
+        });
+        return this;
+    };
+	///////////end show icon
+	
+	//call it!!
+	$("input[type=text]").addClickableBackgroundImage({
+    imageSrc: '../inc/css/images/calendar.gif',
+    alignTo: 'right',
+    callback: callbackFn
+});
